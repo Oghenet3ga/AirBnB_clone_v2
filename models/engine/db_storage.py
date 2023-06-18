@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 """ defines the DBStorage class """
 
-from os import getenvfrom models.base_model import Base
+from os import getenv
+from models.base_model import Base
 from models.user import User
 from models.state import State
 from models.city import City
