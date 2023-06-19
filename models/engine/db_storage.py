@@ -30,9 +30,7 @@ class DBStorage:
         if environ.get('HBNB_ENV') == 'test':
             Base.metadata.drop_all(self.__engine)
 
-        Base.metadata.create_all(self.__engine)
-        session = sessionmaker(bind=self.__engine, expire_on_commit=False)
-        self.__session = scoped_session(session)
+        self.reload()
 
     def all(self, cls=None):
         """Query all objects depending on class name"""
