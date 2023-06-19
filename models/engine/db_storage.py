@@ -12,6 +12,7 @@ from models.amenity import Amenity
 from models.place import Place
 from models.review import Review
 
+
 class DBStorage:
     """ manages MySQL database """
     __engine = None
@@ -20,10 +21,10 @@ class DBStorage:
     def __init__(self):
         """create the engine"""
         self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'
-                                      .format(environ.get('HBNB_MYSQL_USER'), 
-                                      environ.get('HBNB_MYSQL_PWD'), 
-                                      environ.get('HBNB_MYSQL_HOST'),
-                                      environ.get('HBNB_MYSQL_DB')),
+                                      .format(environ.get('HBNB_MYSQL_USER'),
+                                              environ.get('HBNB_MYSQL_PWD'),
+                                              environ.get('HBNB_MYSQL_HOST'),
+                                              environ.get('HBNB_MYSQL_DB')),
                                       pool_pre_ping=True)
 
         if environ.get('HBNB_ENV') == 'test':
@@ -68,5 +69,5 @@ class DBStorage:
     def reload(self):
         """create all tables and create the current database session"""
         Base.metadata.create_all(self.__engine)
-        session_factory = sessionmaker(bind=self.__engine, expire_on_commit=False)
-        self.__session = scoped_session(session_factory)
+        session = sessionmaker(bind=self.__engine, expire_on_commit=False)
+        self.__session = scoped_session(session)
