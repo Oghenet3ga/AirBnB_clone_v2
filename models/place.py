@@ -5,6 +5,7 @@ from sqlalchemy import Column, Integer, String, Float, ForeignKey
 from sqlalchemy.sql.schema import ForeignKeyConstraint
 from models.city import City
 from models.user import User
+from sqlalchemy.orm import relationship
 
 class Place(BaseModel):
     """ A place to stay """
