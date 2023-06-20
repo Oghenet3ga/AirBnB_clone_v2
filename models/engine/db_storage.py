@@ -13,9 +13,6 @@ from models.place import Place
 from models.review import Review
 
 
-if getenv('HBNB_TYPE_STORAGE') == 'db':
-    from models.place import place_amenity
-
 class DBStorage:
     """ manages MySQL database """
     __engine = None
@@ -23,21 +20,20 @@ class DBStorage:
 
     def __init__(self):
         """create the engine"""
-        HBNB_MYSQL_USER = getenv('HBNB_MYSQL_USER')
-        HBNB_MYSQL_PWD = getenv('HBNB_MYSQL_PWD')
-        HBNB_MYSQL_HOST = getenv('HBNB_MYSQL_HOST')
-        HBNB_MYSQL_DB = getenv('HBNB_MYSQL_DB')
-        HBNB_ENV = getenv('HBNB_ENV')
         self.__engine = create_engine(
             'mysql+mysqldb://{}:{}@{}/{}'.format(
-                                           HBNB_MYSQL_USER,
-                                           HBNB_MYSQL_PWD,
-                                           HBNB_MYSQL_HOST,
-                                           HBNB_MYSQL_DB
-                                       ), pool_pre_ping=True)
+                getenv('HBNB_MYSQL_USER'),
+                getenv('HBNB_MYSQL_PWD'),
+                getenv('HBNB_MYSQL_HOST'),
+                getenv('HBNB_MYSQL_DB')
+            ),
+            pool_pre_ping=True
+        )
 
-        if HBNB_ENV == 'test':
+        if getenv('HBNB_ENV') == 'test':
             Base.metadata.drop_all(self.__engine)
+
+        self.reload()
 
     def all(self, cls=None):
         """Query all objects depending on class name"""
@@ -74,5 +70,6 @@ class DBStorage:
     def reload(self):
         """create all tables and create the current database session"""
         Base.metadata.create_all(self.__engine)
-        session = sessionmaker(bind=self.__engine, expire_on_commit=False)
-        self.__session = scoped_session(session)
+        session = scoped_session(sessionmaker(bind=self.__engine,
+                                              expire_on_commit=False))
+        self.__session = session()
