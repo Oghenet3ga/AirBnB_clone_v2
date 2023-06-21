@@ -8,7 +8,6 @@ from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
-import shlex
 
 class FileStorage:
     """This class manages storage of hbnb models in JSON format"""
@@ -23,39 +22,38 @@ class FileStorage:
 
     def all(self, cls=None):
         """Returns a dictionary of models currently in storage"""
-        dic = {}
-        if cls:
-            dictionary = self.__objects
-            for key in dictionary:
-                partition = key.replace('.', ' ')
-                partition = shlex.split(partition)
-                if (partition[0] == cls.__name__):
-                    dic[key] = self.__objects[key]
-            return (dic)
+        if cls is not None:
+            result = {}
+            for key, value in self.__objects.items():
+                if cls == value.__class__ or cls == value.__class__.__name__:
+                    result[key] = value 
+            return result
         else:
             return self.__objects
 
     def new(self, obj):
         """Adds new object to storage dictionary"""
-        if obj:
-            key = "{}.{}".format(type(obj).__name__, obj.id)
-            self.__objects[key] = obj
+        key = "{}.{}".format(obj.__class__.__name__, obj.id)
+        self.__objects[key] = obj
 
     def save(self):
         """Saves storage dictionary to file"""
-        new_dict = {}
-        for key, value in self.__objects.items():
-            new_dict[key] = value.to_dict()
-        with open(self.__file_path, 'w', encoding="UTF-8") as file:
-            json.dump(new_dict, file)
+        temp = {}
+        for key, val in self.__objects.items():
+            temp[key] = val.to_dict()
+        with open(FileStorage.__file_path, 'w') as f:
+            json.dump(temp, f)
 
     def reload(self):
         """Loads storage dictionary from file"""
         try:
-            with open(self.__file_path, 'r', encoding="UTF-8") as f:
-                for key, value in (json.load(f)).items():
-                    value = eval(value["__class__"])(**value)
-                    self.__objects[key] = value
+            with open(FileStorage.__file_path, 'r') as f:
+                temp = json.load(f)
+                for key, val in temp.items():
+                    cls_name = val['__class__']
+                    cls = self.classes.get(cls_name, None)
+                    if cls is not None:
+                        self.__objects[key] = cls(**val)
         except FileNotFoundError:
             pass
 
@@ -64,10 +62,9 @@ class FileStorage:
         Deletes obj from __objects if it's inside
         If obj is equal to None, the method should not do anything
         """
-        if obj:
-            key = "{}.{}".format(type(obj).__name__, obj.id)
+        if obj is None:
+            return
+        key = "{}.{}".format(obj.__class__.__name__, obj.id)
+        if key in self.__objects:
             del self.__objects[key]
-
-    def close(self):
-        """close method calling reload"""
-        self.reload()
+            self.save()
