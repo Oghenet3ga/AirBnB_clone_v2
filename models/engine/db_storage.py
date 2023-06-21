@@ -12,6 +12,8 @@ from models.amenity import Amenity
 from models.place import Place
 from models.review import Review
 
+if getenv('HBNB_TYPE_STORAGE') == 'db':
+    from models.place import place_amenity
 
 class DBStorage:
     """ manages MySQL database """
@@ -32,8 +34,6 @@ class DBStorage:
 
         if getenv('HBNB_ENV') == 'test':
             Base.metadata.drop_all(self.__engine)
-
-        self.reload()
 
     def all(self, cls=None):
         """Query all objects depending on class name"""
