@@ -18,6 +18,7 @@ class DBStorage:
     __session = None
 
     def __init__(self):
+        """create the engine"""
         self.__engine = create_engine('mysql+mysqldb://{}:{}@{}:3306/{}'.format(
             os.environ.get('HBNB_MYSQL_USER'),
             os.environ.get('HBNB_MYSQL_PWD'),
@@ -28,16 +29,23 @@ class DBStorage:
             Base.metadata.drop_all(self.__engine)
 
     def all(self, cls=None):
-        if cls is not None:
-            instances = self.__session.query(cls).all()
+        """Query all objects depending on class name"""
+        classes = [User, State, City, Amenity, Place, Review]
+        objects = {}
+
+        if cls:
+            query = self.__session.query(cls).all()
+            for obj in query:
+                key = f"{type(obj).__name__}.{obj.id}"
+                objects[key] = obj
         else:
-            instances = []
-            for cls in [State, City, User, Place, Review]:
-                instances.extend(self.__session.query(cls).all())
-        all_instances = {}
-        for instance in instances:
-            all_instances['{}.{}'.format(instance.__class__.__name__, instance.id)] = instance
-        return all_instances
+            for cls in classes:
+                query = self.__session.query(cls).all()
+                for obj in query:
+                    key = f"{type(obj).__name__}.{obj.id}"
+                    objects[key] = obj
+
+        return objects
 
     def new(self, obj):
         """add the object to the current database session"""
